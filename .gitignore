@@ -1,0 +1,17 @@
+# node modules 
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# environment variables (API keys, sensitive data)
+.env
+
+# logs
+logs/
+*.log
+
+# system files (MacOS)
+.DS_Store
+
+# build files
+dist/
