@@ -1,10 +1,12 @@
+require('dotenv').config();
+
 const express = require('express'); // framework for creating the server
 const axios = require('axios'); // axios for making HTTP requests to external APIs
 const cors = require('cors'); // CORS middleware to handle cross-origin requests
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-const API_KEY = 'ZTRIKEFV0111FU2S'; 
+const API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
 
 // middleware setup
 app.use(cors());
