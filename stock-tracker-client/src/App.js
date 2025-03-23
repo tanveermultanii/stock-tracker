@@ -4,6 +4,8 @@ import './App.css';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement);
 
 function StockChart({ data, darkMode }) {
@@ -63,10 +65,10 @@ function App() {
         setLoading(true);
 
         try {
-            const stockResponse = await axios.get(`http://localhost:8000/api/stock/${ticker}`);
+            const stockResponse = await axios.get(`${API_BASE}/api/stock/${ticker}`);
             setStockData(stockResponse.data);
 
-            const historyResponse = await axios.get(`http://localhost:8000/api/stock/${ticker}/history`);
+            const historyResponse = await axios.get(`${API_BASE}/api/stock/${ticker}/history`);
             setHistoricalData(historyResponse.data);
         } catch (err) {
             console.error(err);
