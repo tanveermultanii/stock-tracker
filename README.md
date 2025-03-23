@@ -1,4 +1,4 @@
-# StockTracker
+# Stock Tracker
 
 A real-time stock tracking web app that fetches and displays live stock prices, historical data, and charts based on user input.
 
@@ -13,16 +13,18 @@ A real-time stock tracking web app that fetches and displays live stock prices, 
 **API:** Yahoo Finance (via `yahoo-finance2` npm package)  
 
 ## Getting Started
-
 ### Backend
 ```bash
 cd stock-tracker
 npm install
 node server.js
+```
 
 ### Frontend
+```bash
 cd stock-tracker-client
 npm install
 npm start
+```
 
 Visit the app locally: http://localhost:3000
