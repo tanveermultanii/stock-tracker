@@ -1,45 +1,69 @@
-require('dotenv').config();
-
-const express = require('express'); // framework for creating the server
-const axios = require('axios'); // axios for making HTTP requests to external APIs
-const cors = require('cors'); // CORS middleware to handle cross-origin requests
+const express = require('express');
+const cors = require('cors');
+const yahooFinance = require('yahoo-finance2').default; 
 
 const app = express();
-const PORT = process.env.PORT || 8080;
-const API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
+const PORT = process.env.PORT || 8000;
 
-// middleware setup
 app.use(cors());
 app.use(express.json());
 
-// endpoint to fetch stock data form Alpha Vantage API
 app.get('/api/stock/:ticker', async (req, res) => {
     const { ticker } = req.params;
+    console.log(`Fetching real-time data for ${ticker} from Yahoo Finance`);
+
     try {
-        // make a request to Alpha Vantage's GLOBAL_QUOTE API endpoint
-        const response = await axios.get('https://www.alphavantage.co/query', {
-            params: {
-                function: 'GLOBAL_QUOTE',
-                symbol: ticker,
-                apikey: API_KEY
-            }
-        });
+        const quote = await yahooFinance.quote(ticker);
 
-        const data = response.data; // extract response data
-
-        // check if valid stock data is returned
-        if (data['Global Quote'] && Object.keys(data['Global Quote']).length > 0) {
-            res.json(data['Global Quote']); // send the stock data as JSON response
-        } else {
-            res.status(404).json({ error: 'Stock data not found' });
+        if (!quote) {
+            console.log(`No data found for ${ticker}`);
+            return res.status(404).json({ error: 'Stock data not found' });
         }
+
+        res.json({
+            "01. symbol": ticker,
+            "05. price": quote.regularMarketPrice,
+            "09. change": quote.regularMarketChange.toFixed(2),
+            "10. change percent": quote.regularMarketChangePercent.toFixed(2) + "%"
+        });
     } catch (error) {
-        console.error(error);
+        console.error(`Error fetching real-time data for ${ticker}:`, error.message);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// start the server
+app.get('/api/stock/:ticker/history', async (req, res) => {
+    const { ticker } = req.params;
+    console.log(`Fetching 7-day historical data for ${ticker} from Yahoo Finance`);
+
+    try {
+        const today = new Date();
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(today.getDate() - 7);
+
+        const history = await yahooFinance.historical(ticker, {
+            period1: oneWeekAgo.toISOString().split('T')[0],  // start date
+            period2: today.toISOString().split('T')[0],       // end date
+            interval: '1d'
+        });
+
+        if (!history || history.length === 0) {
+            console.log(`No historical data found for ${ticker}`);
+            return res.status(404).json({ error: 'Historical data not found.' });
+        }
+
+        const formattedHistory = history.map(day => ({
+            date: day.date.toISOString().split('T')[0],
+            price: day.close
+        }));
+
+        res.json(formattedHistory);
+    } catch (error) {
+        console.error(`Error fetching historical data for ${ticker}:`, error.message);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
